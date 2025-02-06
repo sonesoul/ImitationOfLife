@@ -80,7 +80,7 @@ namespace ImitationOfLife.Commands
                     size.Clamp(1, 256);
                     size.Height /= 2;
                     string imagePath = await GetFile(document);
-                    string artfilePath = Path.Combine(GetTempDirectory(), "artfile.txt");
+                    string artfilePath = Path.Combine(TempDirectoryPath, "artfile.txt");
                     ImageHelper.Resize(imagePath, size);
                     string artStr;
 
@@ -492,6 +492,7 @@ namespace ImitationOfLife.Commands
         public readonly static HashSet<string> textMimes = ["text/plain"];
         public readonly static HashSet<string> supportedMimes = [.. imageMimes, .. textMimes];
         public const int OneMBInBytes = 1048576;
+
         public static async Task ExtractCommand(Message message, Document document)
         {
             string errorMessage = ValidateDocument(message, document);
@@ -580,14 +581,14 @@ namespace ImitationOfLife.Commands
                 throw new ArgumentNullException(nameof(document), $"FileName is null");
 
             string filename = document.FileName;
-            string path = Path.Combine(GetTempDirectory(), filename);
+            string path = Path.Combine(TempDirectoryPath, filename);
 
             int nameIndex = 0;
             bool fileExists = System.IO.File.Exists(path);
 
             while (fileExists)
             {
-                path = Path.Combine(GetTempDirectory(), $"{nameIndex++}_{filename}");
+                path = Path.Combine(TempDirectoryPath, $"{nameIndex++}_{filename}");
                 fileExists = System.IO.File.Exists(path);
             }
 

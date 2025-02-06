@@ -1,4 +1,6 @@
-﻿namespace ImitationOfLife
+﻿using System.Text;
+
+namespace ImitationOfLife
 {
     public static class Program
     {
@@ -6,16 +8,21 @@
         {
             private readonly static Command[] commands =
             [
-                new("run", Commands.Run, "initialize and unlock bot"),
-                new("init", Bot.Initialize, "initialize bot (no unlocking)"),
-                new("break", Bot.Break, "break bot instance"),
-                new("lock", Bot.Lock, "lock bot commands"),
-                new("unlock", Bot.Unlock, "unlock bot commands"),
-                new("help", Commands.Help, "show this info"),
-                new("settoken", Commands.SetToken, "set bot token"),
-                new("gettoken", () => Console.WriteLine(Config.GetBotToken()), "get current bot token"),
-                new("clear", Console.Clear, "clear the console"),
-                new("exit", Commands.Exit, "close the program"),
+                new("run", s => Commands.Run(), "initialize and unlock bot"),
+                new("init", s => Bot.Initialize(), "initialize bot (no unlocking)"),
+                new("break", s => Bot.Break(), "break bot instance"),
+                new("lock", s => Bot.Lock(), "lock bot commands"),
+                new("unlock", s => Bot.Unlock(), "unlock bot commands"),
+                new("help", s => Commands.Help(), "show this info"),
+                
+                new("settoken", Config.SetToken, "set bot token"),
+                new("gettoken", s => Console.WriteLine(Config.LoadToken()), "get current bot token"),
+
+                new("setkey", Config.SetKey, "set token encryption key"),
+                new("getkey", s => Console.WriteLine(Config.LoadKey()), "get token encryption key"),
+                
+                new("clear", s=> Console.Clear(), "clear the console"),
+                new("exit", s => Commands.Exit(), "close the program"),
             ];
 
             private static class Commands
@@ -41,27 +48,26 @@
                     }
 
                     Console.WriteLine("------------\n");
-                }
-                public static void SetToken()
-                {
-                    Console.Write("Enter bot token: ");
-                    Config.SetBotToken(Console.ReadLine().Trim());
-                }
+                }   
             }
             public static void HandleInput(string input)
             {
+                string[] inputs = input.Split(' ');
+                string command = inputs[0].Trim();
+                string args = string.Join(" ", inputs[1..]);
+
                 foreach (var item in commands)
                 {
-                    if (input.Trim().Equals(item.Key, StringComparison.OrdinalIgnoreCase))
+                    if (command.Equals(item.Key, StringComparison.OrdinalIgnoreCase))
                     {
-                        item.Action();
+                        item.Action(args);
                         break;
                     }
                 }
             }
-            readonly struct Command(string key, Action action, string caption)
+            readonly struct Command(string key, Action<string> action, string caption)
             {
-                public Action Action { get; init; } = action;
+                public Action<string> Action { get; init; } = action;
                 public string Key { get; init; } = key;
                 public string Caption { get; init; } = caption;
             }
@@ -70,7 +76,12 @@
         private static void Main(string[] args)
         {
             ProgramCommands.HandleInput("help");
-            
+
+            foreach (var item in args)
+            {
+                ProgramCommands.HandleInput(item);
+            }
+
             while (true)
             {
                 try

@@ -11,7 +11,7 @@ namespace ImitationOfLife
         public static class Instance
         {
             public static TelegramBotClient Client { get; private set; }
-            public static void Create() => Client = new(Config.GetBotToken());
+            public static void Create() => Client = new(Config.LoadToken());
         }
 
         private static bool isLocked = false;
