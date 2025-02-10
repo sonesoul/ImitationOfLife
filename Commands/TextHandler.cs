@@ -84,7 +84,7 @@ namespace ImitationOfLife.Commands
                        "`hardchoice < чай или кофе` - поможет выбрать!\n" +
                        "`math < 2 + 2 * 2` - решит пример\n" +
                        "`help < convert` - поможет разобраться в команде\n" +
-                       "`llamaai < привет!` - запрос к нейросети \"Ollama 3.1\", вместо \"привет!\" можешь вводить что угодно!\n";
+                       "`about` - немного информации о боте";
 
                     await Client.SendTextMessageAsync(chatId, generalHelp, parseMode: ParseMode.Markdown);
                 }
@@ -767,6 +767,25 @@ namespace ImitationOfLife.Commands
                 public string Description => "узнать chat id";
                 public string Syntax => Keyword;
                 public string Keyword => "chatid";
+            }
+            public class About : ITextCommand
+            {
+                public async Task ExecuteText(Message message)
+                {
+                    string text = 
+                       "| Все сообщения логируются и видны владельцу\n" +
+                       "| Команды работают не чаще раза в секунду\n" +
+                       "| В команде `random` используется псевдо-рандом\n" +
+                       "| В случае ошибок бот продолжает работу\n" +
+                       "| Гарантий постоянной работы нет\n" +
+                       "| [Исходный код проекта](https://github.com/sonesoul/ImitationOfLife)";
+
+                    await Client.SendTextMessageAsync(message.Chat.Id, text, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                }
+
+                public string Description => "информация о боте";
+                public string Syntax => Keyword;
+                public string Keyword => "about";
             }
         }
         public static async Task ExtractCommand(Message message)
