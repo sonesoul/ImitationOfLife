@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Telegram.Bot;
+using Telegram.Bot.Types;
 
 namespace ImitationOfLife
 {
@@ -6,14 +8,22 @@ namespace ImitationOfLife
     {
         private static class ProgramCommands
         {
+            readonly struct Command(string key, Action<string> action, string caption)
+            {
+                public Action<string> Action { get; init; } = action;
+                public string Key { get; init; } = key;
+                public string Caption { get; init; } = caption;
+            }
+
             private readonly static Command[] commands =
             [
-                new("run", s => Commands.Run(), "initialize and unlock bot"),
+                new("run", s => Run(), "initialize and unlock bot"),
                 new("init", s => Bot.Initialize(), "initialize bot (no unlocking)"),
                 new("break", s => Bot.Break(), "break bot instance"),
                 new("lock", s => Bot.Lock(), "lock bot commands"),
                 new("unlock", s => Bot.Unlock(), "unlock bot commands"),
-                new("help", s => Commands.Help(), "show this info"),
+                new("help", s => Help(), "show this info"),
+                new("sendto", SendTo, "send message to a specific user"),
                 
                 new("settoken", Config.SetToken, "set bot token"),
                 new("gettoken", s => Console.WriteLine(Config.LoadToken()), "get current bot token"),
@@ -21,35 +31,10 @@ namespace ImitationOfLife
                 new("setkey", Config.SetKey, "set token encryption key"),
                 new("getkey", s => Console.WriteLine(Config.LoadKey()), "get token encryption key"),
                 
-                new("clear", s=> Console.Clear(), "clear the console"),
-                new("exit", s => Commands.Exit(), "close the program"),
+                new("clear", s => Console.Clear(), "clear the console"),
+                new("exit", s => Exit(), "close the program"),
             ];
-
-            private static class Commands
-            {
-                public static void Run()
-                {
-                    Bot.Initialize();
-                    Bot.Unlock();
-                    Console.WriteLine();
-                }
-                public static void Exit() => Environment.Exit(0);
-                public static void Help()
-                {
-                    Console.WriteLine("------------");
-                    var names = commands.Select(c => (c.Key, c.Caption)).ToList();
-
-                    foreach ((string key, string caption) in names)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.Write("  " + key);
-                        Console.ResetColor();
-                        Console.Write(" - " + caption + '\n');
-                    }
-
-                    Console.WriteLine("------------\n");
-                }   
-            }
+           
             public static void HandleInput(string input)
             {
                 string[] inputs = input.Split(' ');
@@ -65,11 +50,45 @@ namespace ImitationOfLife
                     }
                 }
             }
-            readonly struct Command(string key, Action<string> action, string caption)
+            
+            
+            public static void Run()
             {
-                public Action<string> Action { get; init; } = action;
-                public string Key { get; init; } = key;
-                public string Caption { get; init; } = caption;
+                Bot.Initialize();
+                Bot.Unlock();
+                Console.WriteLine();
+            }
+            public static void Exit() => Environment.Exit(0);
+            public static void Help()
+            {
+                Console.WriteLine("------------");
+                var names = commands.Select(c => (c.Key, c.Caption)).ToList();
+
+                foreach ((string key, string caption) in names)
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("  " + key);
+                    Console.ResetColor();
+                    Console.Write(" - " + caption + '\n');
+                }
+
+                Console.WriteLine("------------\n");
+            }
+            public static void SendTo(string parameters)
+            {
+                string[] splitted = parameters.Split(' ');
+
+                if (splitted.Length < 2)
+                {
+                    throw new ArgumentException("Not enough parameters");
+                }
+
+                if (Client == null)
+                {
+                    throw new NullReferenceException("Client is not initialized");
+                }
+
+                Client.SendTextMessageAsync(long.Parse(splitted[0]), parameters[(parameters.IndexOf(splitted[1]))..], parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
             }
         }
 
