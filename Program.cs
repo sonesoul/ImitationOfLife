@@ -75,6 +75,8 @@ namespace ImitationOfLife
 
         private static void Main(string[] args)
         {
+            Config.Initialize();
+
             ProgramCommands.HandleInput("help");
 
             foreach (var item in args)
