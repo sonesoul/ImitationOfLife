@@ -17,6 +17,9 @@
 
         public static bool CanSend(string username)
         {
+            if (username == null)
+                return true;
+
             if (users.TryGetValue(username, out var lastSentTime)) 
             {
                 bool canSend = lastSentTime.IsCooldownOver(SendCooldown);
