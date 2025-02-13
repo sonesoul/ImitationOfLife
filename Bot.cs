@@ -14,7 +14,7 @@ namespace ImitationOfLife
             public static void Create() => Client = new(Config.LoadToken());
         }
 
-        private static bool isLocked = false;
+        private static bool isLocked = true;
         private static bool isRunning = false;
 
         private static CancellationTokenSource cts;
